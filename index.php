@@ -8,6 +8,7 @@ Author:       WordPress.org
 Author URI:   https://developer.wordpress.org/
 */
 
+
 include_once 'vendor/autoload.php';
 use Kunnu\Dropbox\Dropbox;
 use Kunnu\Dropbox\DropboxApp;
@@ -20,7 +21,7 @@ class DropboxUpload{
 	}
 	public function initial(){
 		$this->pre_define();
-		$this->activation_hook();
+		$this->hooks();
 		$this->db_prefix();
 		$this->action();
 		$this->apply_filter();
@@ -114,7 +115,8 @@ class DropboxUpload{
 	}
 	public function apply_filter(){
 		global $wpdb;
-		$value =  $wpdb->get_results("SELECT * FROM wp_custome_form ",ARRAY_A);
+		$table_name  = $this->db_prefix()."custome_form";
+		$value =  $wpdb->get_results("SELECT * FROM $table_name ",ARRAY_A);
 		$apply_filter = apply_filters('shot-code',$value);
 		foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
 			add_shortcode($shortcode_name,function() use ($shortcode_value){
@@ -124,12 +126,21 @@ class DropboxUpload{
 	}
 
 
-	public function activation_hook(){
+	public function hooks(){
 		register_activation_hook(__FILE__,array($this,'activation_table'));
+		register_deactivation_hook( __FILE__,array($this,'deactivation_hook'));
 		// __FILE__  current file location (index.php)
 	}
+
+	public function deactivation_hook(){
+		global $wpdb;
+		$table_name  = $this->db_prefix()."dropbox_details";
+		$wpdb->query("TRUNCATE TABLE $table_name ");
+
+	}
+
 	public function activation_table(){
-		$table_name  = $this->db_prefix."dropbox_details1";
+		$table_name  = $this->db_prefix()."dropbox_details";
 		$sql = "CREATE TABLE `$table_name` (
 		`app_key` varchar(15) NOT NULL,
 		`app_secret` varchar(15) NOT NULL,
