@@ -18,11 +18,11 @@ jQuery(document).ready(function(){
 			// $j("#message").html("<b>File Uploaded Successfully</b>");
 				// console.log(url);
 				// console.log(data); //should print out the name since you sent it along
-				// location. reload(true);
+				location. reload(true);
 			},
 			error: function(errorThrown){
 				// console.log(errorThrown);
-				// location. reload(true);
+				location. reload(true);
 			} 
 		});
 	});
@@ -40,6 +40,8 @@ jQuery(document).ready(function(){
 			},
 			success: function(data) {
 				console.log(data);
+				location. reload(true);
+				
 				// $j("#message").html("<b>Dropbox Account Details Added Successfully</b>");
 				// console.log(data); //should print out the name since you sent it along
 			},

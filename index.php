@@ -41,6 +41,7 @@ class DropboxUpload{
 		add_action('admin_menu',array($this,'menu'));
 		add_action('wp_ajax_add_dropbox_account_details',array($this,'credentials'));
 		add_action('wp_ajax_my_ajax_function',array($this,'dropbox_sdk'));
+		add_action('wp_ajax_shot_code_register',array($this,'add_new_shotcode'));
 		add_filter('shot-code',array($this,'shot_code_callback'),10,1);
 	}
 	public function credentials(){
@@ -64,6 +65,38 @@ class DropboxUpload{
 		$option =$this->folder;
 		return $this->recursiveScan($dir,$option); 
 	}
+
+	public function add_new_shotcode(){
+		// echo "Hello World";
+		 global $wpdb;
+		 $shot_code = json_decode(stripslashes($_POST['shot_code']));
+		 $shortcode_name = $shot_code->shortcode_name;
+		 $new_label_data['label_name'] = $shot_code->label_name;
+		 $new_field_data['field_name'] = $shot_code->field_name;
+		 foreach ($new_label_data as $key => $value) {
+		 	foreach ($value as $key => $label_value) {
+		 		$newlabel_value[] = $label_value; 
+		 	}
+		 }
+		  foreach ($new_field_data as $key => $value) {
+		 	foreach ($value as $key => $field_value) {
+		 		$newfield_value[] = $field_value; 
+		 	}
+		 }
+		 
+		 $form_array = array_combine($newlabel_value,$newfield_value);
+		 foreach ($form_array as $key => $value) {
+		 	$result .= "$key:<input type='".$value."' name='".$key."'><br>";
+		 }
+		 $column_values = array('form_id'=>$shortcode_name,'string'=>$result);
+		 $shotcode = $wpdb->insert('wp_custome_form',$column_values);
+		 if($shotcode){
+		 	echo "1";
+		 }else{
+		 	echo "0";
+		 }
+
+	}
 	public function recursiveScan($dir,$option){
 		global $wpdb;
 		$table_name = $this->db_prefix().'dropbox_details';
@@ -86,9 +119,9 @@ class DropboxUpload{
 		}
 	}
 	public function menu(){
-	add_menu_page('Dropbox Page','Dropbox Upload','manage_options','dropbox_view');
-	add_submenu_page('dropbox_view','File Upload','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
-	add_submenu_page('dropbox_view','Create Form','Add New Form','manage_options','create-form',array($this,'custome_form'));
+		add_menu_page('Dropbox Page','Dropbox Upload','manage_options','dropbox_view');
+		add_submenu_page('dropbox_view','File Upload','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
+		add_submenu_page('dropbox_view','Create Form','Add New Form','manage_options','create-form',array($this,'custome_form'));
 	}
 	public function custome_form(){
 		include PLUGIN_DIR_PATH.'view/custome_form.php';
